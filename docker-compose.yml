@@ -1,12 +1,25 @@
-version: '3.9'
+# @format
+
+version: "3.9"
 
 networks:
   dev-network:
     driver: bridge
 
 services:
-
   dev-db:
+    image: postgres:16.1-alpine3.19
+    restart: always
+    env_file:
+      - ./.env
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./scripts:/docker-entrypoint-initdb.d
+    networks:
+      - dev-network
+
+  test-db:
     image: postgres:16.1-alpine3.19
     restart: always
     env_file:

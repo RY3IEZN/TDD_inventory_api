@@ -7,4 +7,4 @@ export PGUSER="uneku"
 psql -c "CREATE DATABASE inventory"
 
 # create an extension if not exist
-psql inventory -c "CREATE EXTENSION IF NOT EXISTS \"uuid-oossp\";"
+psql inventory -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"

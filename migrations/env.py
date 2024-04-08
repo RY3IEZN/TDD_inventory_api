@@ -18,6 +18,7 @@ if config.config_file_name is not None:
 
 
 config.set_section_option("devdb", "sqlalchemy.url", os.environ.get("POSTGRES_DB_URL"))
+config.set_section_option("testdb", "sqlalchemy.url", os.environ.get("TEST_DB_URL"))
 
 # add your model's MetaData object here
 # for 'autogenerate' support
