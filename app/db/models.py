@@ -11,6 +11,8 @@ from sqlalchemy import (
     text,
     DateTime,
     Enum,
+    Float,
+    DECIMAL,
     ForeignKey,
 )
 
@@ -70,11 +72,91 @@ class Product(Base):
         server_default="oos",
     )
     category_id = Column(Integer, ForeignKey("category.id"), nullable=False)
-    # seasonal_id = Column(Integer, ForeignKey("seasonal_event.id"), nullable=True)
+    seasonal_id = Column(Integer, ForeignKey("seasonal_event.id"), nullable=True)
 
     __table_args__ = (
         CheckConstraint("LENGTH(name) > 0", name="product_name_length_check"),
         CheckConstraint("LENGTH(slug) > 0", name="product_slug_length_check"),
         UniqueConstraint("name", name="unq_product_name_level"),
         UniqueConstraint("slug", name="unq_product_name_slug"),
+        UniqueConstraint("pid", name="unq_product_pid"),
+    )
+
+
+class ProductLine(Base):
+    __tablename__ = "product_line"
+    id = Column(Integer, primary_key=True, nullable=False)
+    price = Column(DECIMAL(5, 2), nullable=False)
+    sku = Column(
+        UUID(as_uuid=True),
+        nullable=False,
+        unique=True,
+        server_default=text("uuid_generate_v4()"),
+    )
+    name = Column(String(200), nullable=False)
+    slug = Column(
+        String(220),
+        nullable=False,
+    )
+    stock_qty = Column(Integer, nullable=False, default=0, server_default="0")
+    is_active = Column(Boolean, nullable=False, default=False, server_default="False")
+    weight = Column(Float, nullable=False)
+    order = Column(Integer, nullable=False)
+    created_at = Column(
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
+    )
+    product_id = Column(Integer, ForeignKey("product.id"), nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "price >= 0 and price <= 999.99", name="product_line_max_value"
+        ),
+        CheckConstraint(
+            '"order" >= 1 AND "order" <= 100', name="product_order_line_range"
+        ),
+        UniqueConstraint(
+            "order", "product_id", name="unq_product_line_order_product_id"
+        ),
+        UniqueConstraint("sku", name="unq_product_line_sku"),
+    )
+
+
+class ProductImage(Base):
+    __tablename__ = "product_image"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    alternative_text = Column(String(100), nullable=False)
+    url = Column(String(100), nullable=False)
+    order = Column(Integer, nullable=False)
+    product_line_id = Column(Integer, ForeignKey("product_line.id"), nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            '"order" >= 1 AND "order" <= 100', name="product_image_order_range"
+        ),
+        CheckConstraint(
+            "LENGTH(alternative_text) > 0",
+            name="product_image_alternative_length_check",
+        ),
+        CheckConstraint("LENGTH(url) > 0", name="product_image_url_length_check"),
+        UniqueConstraint(
+            "order", "product_line_id", name="unq_product_image_line_order_product_id"
+        ),
+    )
+
+
+class SeasonalEvent(Base):
+    __tablename__ = "seasonal_event"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    start_date = Column(DateTime, nullable=False)
+    end_date = Column(DateTime, nullable=False)
+    name = Column(String(100), nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "LENGTH(name) > 0",
+            name="season_event_name_length_check",
+        ),
+        UniqueConstraint("name", name="unq_seasonal_event_name"),
     )

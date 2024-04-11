@@ -46,8 +46,8 @@ def start_database_container():
         "detach": True,
         "ports": {"5432": "5434"},
         "environment": {
-            "POSTGRES_USER": "postgres",
-            "POSTGRES_PASSWORD": "postgres",
+            "POSTGRES_USER": "",
+            "POSTGRES_PASSWORD": "",
         },
         "volumes": [f"{scripts_dir}:/docker-entrypoint-initdb.d"],
         "network_mode": "fastapi-development_dev-network",
